@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Requests</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="dashboard-container">
+
+<h2>Requests</h2>
+
+<div id="requestsList"></div>
+
+</div>
+
+
+<script type="module">
+
+import {auth,db} from "./firebase.js";
+
+import {
+collection,
+query,
+where,
+getDocs,
+doc,
+updateDoc,
+getDoc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+
+// ---------- LOAD REQUESTS ----------
+
+async function loadRequests(){
+
+const user = auth.currentUser;
+
+const container = document.getElementById("requestsList");
+
+container.innerHTML="";
+
+const q = query(
+collection(db,"swapRequests"),
+where("toUserId","==",user.uid)
+);
+
+const snapshot = await getDocs(q);
+
+for (const docSnap of snapshot.docs) {
+
+const data = docSnap.data();
+
+const fromUserDoc = await getDoc(doc(db, "users", data.fromUserId));
+
+const fromUserName = fromUserDoc.exists() ? fromUserDoc.data().name || "Unknown User" : "Unknown User";
+
+container.innerHTML += `
+
+<div class="card">
+
+<p><b>From:</b> ${fromUserName}</p>
+
+<p>Status: ${data.status}</p>
+
+${
+data.status==="pending"
+?
+
+`
+<button onclick="acceptRequest('${docSnap.id}')">Accept</button>
+<button onclick="rejectRequest('${docSnap.id}')">Reject</button>
+`
+
+:
+
+""
+}
+
+
+${
+data.status==="accepted"
+?
+
+`
+
+<h4>Schedule Session</h4>
+
+<input type="date" id="date-${docSnap.id}">
+<input type="time" id="time-${docSnap.id}">
+<input placeholder="Google Meet Link" id="meet-${docSnap.id}">
+
+<button onclick="scheduleSession('${docSnap.id}')">
+Save Session
+</button>
+
+<button onclick="completeSession('${docSnap.id}')">
+Session Completed
+</button>
+
+`
+
+:
+
+""
+}
+
+</div>
+
+`;
+
+}
+
+}
+
+
+
+// ---------- ACCEPT REQUEST ----------
+
+window.acceptRequest = async function(id){
+
+await updateDoc(doc(db,"swapRequests",id),{
+
+status:"accepted"
+
+});
+
+alert("Request Accepted");
+
+loadRequests();
+
+}
+
+
+
+// ---------- REJECT REQUEST ----------
+
+window.rejectRequest = async function(id){
+
+await updateDoc(doc(db,"swapRequests",id),{
+
+status:"rejected"
+
+});
+
+alert("Request Rejected");
+
+loadRequests();
+
+}
+
+
+
+// ---------- SCHEDULE SESSION ----------
+
+window.scheduleSession = async function(id){
+
+const date = document.getElementById("date-"+id).value;
+const time = document.getElementById("time-"+id).value;
+const meet = document.getElementById("meet-"+id).value;
+
+await updateDoc(doc(db,"swapRequests",id),{
+
+sessionDate:date,
+sessionTime:time,
+meetLink:meet
+
+});
+
+alert("Session Scheduled");
+
+loadRequests();
+
+}
+
+
+
+// ---------- SESSION COMPLETE ----------
+
+window.completeSession = async function(id){
+
+await updateDoc(doc(db,"swapRequests",id),{
+
+status:"completed"
+
+});
+
+alert("Session Completed");
+
+loadRequests();
+
+}
+
+
+
+// ---------- AUTH CHECK ----------
+
+auth.onAuthStateChanged(user=>{
+
+if(user){
+
+loadRequests();
+
+}else{
+
+location.href="index.html"
+
+}
+
+});
+
+</script>
+
+</body>
+</html>
