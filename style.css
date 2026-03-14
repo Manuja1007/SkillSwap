@@ -1,0 +1,219 @@
+/* ---------- BODY BACKGROUND ---------- */
+
+body{
+margin:0;
+font-family:Arial, Helvetica, sans-serif;
+
+background: linear-gradient(
+135deg,
+#ffd6e8,
+#ffe9a8,
+#ffc9a9
+);
+
+min-height:100vh;
+
+display:flex;
+justify-content:center;
+align-items:flex-start;
+
+padding:40px;
+}
+
+
+
+/* ---------- MAIN CONTAINER ---------- */
+
+.container,
+.dashboard-container{
+
+width:700px;
+
+background:white;
+
+padding:25px;
+
+border-radius:14px;
+
+box-shadow:0 6px 18px rgba(0,0,0,0.1);
+
+}
+
+
+
+/* ---------- HEADINGS ---------- */
+
+h2,h3{
+
+text-align:center;
+
+color:#ff6f91;
+
+margin-bottom:20px;
+
+}
+
+
+
+/* ---------- INPUTS ---------- */
+
+input, textarea{
+
+width:95%;
+
+padding:10px;
+
+margin:8px 0;
+
+border-radius:10px;
+
+border:1px solid #ddd;
+
+font-size:14px;
+
+}
+
+
+
+/* ---------- BUTTON ---------- */
+
+button{
+
+padding:10px 14px;
+
+border:none;
+
+border-radius:10px;
+
+background:#ff7aa2;
+
+color:white;
+
+cursor:pointer;
+
+margin-top:6px;
+
+font-weight:500;
+
+}
+
+button:hover{
+
+background:#ff5c8a;
+
+}
+
+
+
+/* ---------- USER CARDS ---------- */
+
+.card{
+
+background:#fff7fb;
+
+padding:15px;
+
+margin:12px 0;
+
+border-radius:12px;
+
+border:1px solid #ffd1e3;
+
+}
+
+
+
+/* ---------- NAVBAR ---------- */
+
+.navbar{
+
+display:flex;
+
+justify-content:space-around;
+
+background:#fff;
+
+padding:10px;
+
+border-radius:12px;
+
+margin-bottom:20px;
+
+box-shadow:0 3px 10px rgba(0,0,0,0.08);
+
+}
+
+
+
+/* ---------- NAV ITEM ---------- */
+
+.nav-item{
+
+text-align:center;
+
+cursor:pointer;
+
+font-size:13px;
+
+color:#444;
+
+}
+
+
+
+/* ---------- NAV ICON ---------- */
+
+.nav-item span{
+
+font-size:22px;
+
+display:block;
+
+margin-bottom:2px;
+
+}
+
+
+
+/* ---------- SEARCH BAR ---------- */
+
+.search-bar{
+
+display:flex;
+
+gap:10px;
+
+margin-bottom:15px;
+
+}
+
+.search-bar input{
+
+flex:1;
+
+}
+
+
+
+/* ---------- SESSION INPUT ---------- */
+
+.card input{
+
+display:block;
+
+width:95%;
+
+margin:5px 0;
+
+padding:8px;
+
+border-radius:8px;
+
+border:1px solid #ddd;
+
+}
+
+#profileCard{
+display:flex;
+justify-content:center;
+}
