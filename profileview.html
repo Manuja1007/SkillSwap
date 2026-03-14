@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>User Profile</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="dashboard-container">
+
+<h2>User Profile</h2>
+
+<div id="profile"></div>
+
+</div>
+
+
+<script type="module">
+
+import { db } from "./firebase.js";
+
+import {
+doc,
+getDoc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+
+const params = new URLSearchParams(window.location.search);
+
+const uid = params.get("user");
+
+
+async function loadProfile(){
+
+const userRef = doc(db,"users",uid);
+
+const snap = await getDoc(userRef);
+
+if(snap.exists()){
+
+const data = snap.data();
+
+document.getElementById("profile").innerHTML = `
+
+<div class="card">
+
+<h3>${data.name}</h3>
+
+<p><b>Email:</b> ${data.email}</p>
+
+<p><b>Skills Offered:</b> ${data.skillsOffer?.join(", ")}</p>
+
+<p><b>Skills Wanted:</b> ${data.skillsWant?.join(", ")}</p>
+
+<p><b>Bio:</b> ${data.bio}</p>
+
+</div>
+
+`;
+
+}
+
+}
+
+loadProfile();
+
+</script>
+
+</body>
+</html>
