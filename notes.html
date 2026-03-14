@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Upload Notes</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="dashboard-container">
+
+<div class="navbar">
+
+<button onclick="location.href='explore.html'">👥</button>
+<button onclick="location.href='requests.html'">📩</button>
+<button onclick="location.href='notes.html'">📚</button>
+
+</div>
+
+<h2>Upload Notes</h2>
+
+<input id="title" placeholder="Title">
+<input id="subject" placeholder="Subject">
+<textarea id="description" placeholder="Description"></textarea>
+
+<button onclick="uploadNote()">Upload</button>
+
+<h3>Available Notes</h3>
+
+<div id="notesList"></div>
+
+</div>
+
+<div class="navbar">
+
+<div class="nav-item" onclick="location.href='explore.html'">
+<span>👥</span>
+<p>Explore</p>
+</div>
+
+<div class="nav-item" onclick="location.href='requests.html'">
+<span>📩</span>
+<p>Requests</p>
+</div>
+
+<div class="nav-item" onclick="location.href='notes.html'">
+<span>📚</span>
+<p>Notes</p>
+</div>
+
+<div class="nav-item" id="logoutBtn">
+<span>🚪</span>
+<p>Logout</p>
+</div>
+
+</div>
+<script type="module">
+
+import {auth, db} from "./firebase.js";
+
+import {
+collection,
+addDoc,
+getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+
+window.uploadNote = async function(){
+
+const title=document.getElementById("title").value;
+const subject=document.getElementById("subject").value;
+const description=document.getElementById("description").value;
+
+await addDoc(collection(db,"notes"),{
+
+userId:auth.currentUser.uid,
+title,
+subject,
+description,
+rating:0,
+timestamp:new Date()
+
+});
+
+alert("Notes Uploaded");
+
+loadNotes();
+
+}
+
+
+async function loadNotes(){
+
+const snapshot=await getDocs(collection(db,"notes"));
+
+const container=document.getElementById("notesList");
+
+container.innerHTML="";
+
+snapshot.forEach(doc=>{
+
+const data=doc.data();
+
+container.innerHTML+=`
+
+<div class="card">
+
+<h4>${data.title}</h4>
+
+<p>${data.subject}</p>
+
+<p>${data.description}</p>
+
+<p>Rating: ${data.rating}</p>
+
+</div>
+
+`;
+
+});
+
+}
+
+loadNotes();
+
+</script>
+<script type="module">
+
+import {auth} from "./firebase.js";
+import {signOut} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+document.getElementById("logoutBtn").addEventListener("click", async ()=>{
+
+await signOut(auth);
+
+window.location.href="index.html";
+
+});
+
+</script>
+</body>
+
+</html>
