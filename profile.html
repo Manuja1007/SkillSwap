@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Profile</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Your Profile</h2>
+
+<input type="text" id="name" placeholder="Your Name">
+
+<input type="text" id="skillsOffer" placeholder="Skills You Offer">
+
+<input type="text" id="skillsWant" placeholder="Skills You Want">
+
+<textarea id="bio" placeholder="Short Bio"></textarea>
+
+<button id="saveProfile">Save Profile</button>
+
+</div>
+
+<script type="module">
+
+import { auth, db } from "./firebase.js";
+import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+document.getElementById("saveProfile").addEventListener("click", async () => {
+
+const user = auth.currentUser;
+
+const name = document.getElementById("name").value;
+const skillsOffer = document.getElementById("skillsOffer").value.split(",").map(s => s.trim()).filter(s => s !== "");
+const skillsWant = document.getElementById("skillsWant").value.split(",").map(s => s.trim()).filter(s => s !== "");
+const bio = document.getElementById("bio").value;
+
+await setDoc(doc(db,"users",user.uid),{
+
+email:user.email,
+name,
+skillsOffer,
+skillsWant,
+bio
+
+},{merge:true});
+
+alert("Profile Saved");
+
+window.location.href="explore.html";
+
+});
+
+
+
+// ---------- LOAD PROFILE ----------
+
+async function loadProfile(user){
+
+const userDoc = await getDoc(doc(db, "users", user.uid));
+
+if(userDoc.exists()){
+
+const data = userDoc.data();
+
+document.getElementById("name").value = data.name || "";
+
+document.getElementById("skillsOffer").value = (data.skillsOffer || []).join(", ");
+
+document.getElementById("skillsWant").value = (data.skillsWant || []).join(", ");
+
+document.getElementById("bio").value = data.bio || "";
+
+}
+
+}
+
+
+
+// ---------- AUTH CHECK ----------
+
+auth.onAuthStateChanged(user=>{
+
+if(user){
+
+loadProfile(user);
+
+}else{
+
+window.location.href="index.html";
+
+}
+
+});
+
+</script>
+
+</body>
+
+</html>
