@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Explore Users</title>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<div class="dashboard-container">
+
+
+<!-- NAVBAR -->
+
+<div class="navbar">
+
+<div class="nav-item" onclick="location.href='explore.html'">
+<span>👥</span>
+<p>Explore</p>
+</div>
+
+<div class="nav-item" onclick="location.href='requests.html'">
+<span>📩</span>
+<p>Requests</p>
+</div>
+
+<div class="nav-item" onclick="location.href='notes.html'">
+<span>📚</span>
+<p>Notes</p>
+</div>
+
+<div class="nav-item" onclick="location.href='profile.html'">
+<span>👤</span>
+<p>Profile</p>
+</div>
+
+<div class="nav-item" id="logoutBtn">
+<span>🚪</span>
+<p>Logout</p>
+</div>
+
+</div>
+
+
+<h2>Explore Users</h2>
+
+
+<!-- SEARCH -->
+
+<div class="search-bar">
+
+<input
+id="searchSkill"
+placeholder="Search skill you want to learn"
+>
+
+<button onclick="searchUsers()">Search</button>
+
+</div>
+
+
+<!-- USERS LIST -->
+
+<div id="usersList"></div>
+
+
+<!-- NOTES SECTION -->
+
+<h2>Available Notes</h2>
+
+<div id="notesList"></div>
+
+
+<script type="module">
+
+import {auth,db} from "./firebase.js";
+
+import {signOut} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+import {
+collection,
+getDocs,
+addDoc,
+query,
+where
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+
+// ---------- LOGOUT ----------
+
+document.getElementById("logoutBtn").addEventListener("click",async()=>{
+
+await signOut(auth);
+
+location.href="index.html";
+
+});
+
+
+
+// ---------- LOAD USERS ----------
+
+async function loadUsers(){
+
+const container=document.getElementById("usersList");
+
+container.innerHTML="";
+
+const snapshot=await getDocs(collection(db,"users"));
+
+snapshot.forEach(doc=>{
+
+const data=doc.data();
+
+if(doc.id===auth.currentUser.uid) return;
+
+container.innerHTML+=`
+
+<div class="card">
+
+<h3>${data.name || "User"}</h3>
+
+<p><b>Offers:</b> ${(data.skillsOffer || []).join(", ")}</p>
+
+<p><b>Wants:</b> ${(data.skillsWant || []).join(", ")}</p>
+
+<button onclick="viewProfile('${doc.id}')">
+View Profile
+</button>
+
+<button onclick="sendRequest('${doc.id}')">
+Send Request
+</button>
+
+</div>
+
+`;
+
+});
+
+}
+
+
+
+// ---------- LOAD NOTES ----------
+
+async function loadNotes(){
+
+const container=document.getElementById("notesList");
+
+container.innerHTML="";
+
+const snapshot=await getDocs(collection(db,"notes"));
+
+snapshot.forEach(doc=>{
+
+const data=doc.data();
+
+container.innerHTML+=`
+
+<div class="card">
+
+<h4>${data.title}</h4>
+
+<p><b>Subject:</b> ${data.subject}</p>
+
+<p>${data.description}</p>
+
+<p>Rating: ${data.rating}</p>
+
+</div>
+
+`;
+
+});
+
+}
+
+
+
+// ---------- VIEW PROFILE ----------
+
+window.viewProfile=function(uid){
+
+window.location.href="profileView.html?user="+uid;
+
+}
+
+
+
+// ---------- SEARCH USERS ----------
+
+window.searchUsers=async function(){
+
+const keyword=document
+.getElementById("searchSkill")
+.value
+.toLowerCase();
+
+const container=document.getElementById("usersList");
+
+container.innerHTML="";
+
+const snapshot=await getDocs(collection(db,"users"));
+
+snapshot.forEach(doc=>{
+
+const data=doc.data();
+
+if(doc.id===auth.currentUser.uid) return;
+
+const skills=(data.skillsOffer || [])
+.join(" ")
+.toLowerCase();
+
+if(skills.includes(keyword)){
+
+container.innerHTML+=`
+
+<div class="card">
+
+<h3>${data.name}</h3>
+
+<p><b>Offers:</b> ${(data.skillsOffer || []).join(", ")}</p>
+
+<p><b>Wants:</b> ${(data.skillsWant || []).join(", ")}</p>
+
+<button onclick="viewProfile('${doc.id}')">
+View Profile
+</button>
+
+<button onclick="sendRequest('${doc.id}')">
+Send Request
+</button>
+
+</div>
+
+`;
+
+}
+
+});
+
+}
+
+
+
+// ---------- SEND REQUEST ----------
+
+window.sendRequest=async function(targetUserId){
+
+const currentUser=auth.currentUser;
+
+try{
+
+const q=query(
+collection(db,"swapRequests"),
+where("fromUserId","==",currentUser.uid),
+where("toUserId","==",targetUserId)
+);
+
+const existing=await getDocs(q);
+
+if(!existing.empty){
+
+alert("Request already sent");
+
+return;
+
+}
+
+await addDoc(collection(db,"swapRequests"),{
+
+fromUserId:currentUser.uid,
+toUserId:targetUserId,
+status:"pending",
+timestamp:new Date()
+
+});
+
+alert("Request Sent Successfully");
+
+}catch(error){
+
+console.error(error);
+
+alert("Error sending request");
+
+}
+
+}
+
+
+
+// ---------- AUTH CHECK ----------
+
+auth.onAuthStateChanged(user=>{
+
+if(user){
+
+loadUsers();
+
+loadNotes();
+
+}else{
+
+location.href="index.html";
+
+}
+
+});
+
+</script>
+
+</body>
+
+</html>
